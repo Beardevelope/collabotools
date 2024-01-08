@@ -8,9 +8,14 @@ export class ListsController {
 
     @Post()
     async createList(
-        @Param('workspaceId') workSpaceId: number,
+        @Param('workspaceId') workspaceId: number,
         @Body() createListDto: CreateListDto,
     ) {
-        return await this.listsService.createList(workSpaceId, createListDto);
+        return await this.listsService.createList(workspaceId, createListDto);
+    }
+
+    @Get()
+    async findAllLists(@Param('workspaceId') workspaceId: number) {
+        return await this.listsService.findAllLists(workspaceId);
     }
 }

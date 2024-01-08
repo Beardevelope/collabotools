@@ -13,18 +13,28 @@ export class ListsService {
         private readonly workspacesRepository: Repository<WorkspacesModel>,
     ) {}
     async createList(workspaceId: number, createListDto: CreateListDto) {
+        await this.verifyWorkSpaceId(workspaceId);
+
+        const list = this.listsRepository.create({
+            workspaceId,
+            title: createListDto.title,
+            order: createListDto.order,
+        });
+        return await this.listsRepository.save(list);
+    }
+
+    async findAllLists(workspaceId: number) {
+        await this.verifyWorkSpaceId(workspaceId);
+        return await this.listsRepository.find({ where: { workspaceId: workspaceId } });
+    }
+
+    async verifyWorkSpaceId(workspaceId: number) {
         const existWorkspaceId = await this.workspacesRepository.findOne({
             where: { id: workspaceId },
         });
-        console.log('workspaceId', workspaceId);
-        console.log('existWorkspaceId', existWorkspaceId);
         if (!existWorkspaceId) {
             throw new BadRequestException('workSpace를 찾을 수 없습니다.');
         }
-        console.log('create', createListDto);
-        const list = this.listsRepository.create(createListDto);
-
-        console.log(list);
-        return await this.listsRepository.save(list);
+        return existWorkspaceId;
     }
 }
