@@ -18,4 +18,7 @@ export const NOT_EQUALS_PASSWORD = '비밀번호가 일치하지 않습니다.';
  */
 export const EXPIRE_TOKEN = '토큰이 만료되었습니다.';
 
+/**
+ * 토큰 타입이 일치하지 않을때
+ */
 export const NOT_MATCH_TOKEN_TYPE = '토큰 타입이 일치하지 않습니다.';

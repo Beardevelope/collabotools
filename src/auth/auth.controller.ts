@@ -1,7 +1,6 @@
-import { Body, Controller, Post, Req, UseGuards } from '@nestjs/common';
+import { Controller, Post, Req, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { BasicTokenGuard } from './guard/basic.guard';
-import { AccessTokenGuard, BearerTokenGuard } from './guard/bearer.guard';
+import { AccessTokenGuard, RefreshTokenGuard } from './guard/bearer.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -13,7 +12,7 @@ export class AuthController {
      * @returns
      */
     @Post('login')
-    @UseGuards(BasicTokenGuard)
+    @UseGuards(AccessTokenGuard)
     login(@Req() req: Request) {
         return {
             accessToken: this.authService.signToken(req['user'], false),
@@ -22,6 +21,7 @@ export class AuthController {
     }
 
     @Post('token/access')
+    @UseGuards(RefreshTokenGuard)
     rotateAccessToken(@Req() req: Request) {
         return this.authService.rotateToken(req['token'], false);
     }
