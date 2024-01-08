@@ -19,7 +19,7 @@ export class ListsModel extends BaseModel {
     /**
      * 워크스페이스
      */
-    @ManyToOne(() => WorkspacesModel)
+    @ManyToOne(() => WorkspacesModel, (workspace) => workspace.lists)
     workspace: WorkspacesModel;
 
     @OneToMany(() => CardsModel, (cards) => cards.list)
