@@ -16,6 +16,9 @@ export class ListsModel extends BaseModel {
     @IsNumber()
     order: number;
 
+    @Column()
+    workspaceId: number;
+
     /**
      * 워크스페이스
      */
