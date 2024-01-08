@@ -33,4 +33,13 @@ export class ListsController {
     deleteList(@Param('workSpaceId') workSpaceId: number, @Param('listId') listId: number) {
         return this.listsService.deleteList(workSpaceId, listId);
     }
+
+    @Put('/order')
+    updateListOrder(
+        @Param('workSpaceId') workSpaceId: number,
+        @Param('listId') listId: number,
+        @Body() updateListDto: UpdateListDto,
+    ) {
+        return this.listsService.updateListOrder(workSpaceId, listId);
+    }
 }

@@ -43,6 +43,8 @@ export class ListsService {
         return { message: 'lsit를 삭제했습니다.' };
     }
 
+    async updateListOrder(workspaceId: number, listId: number) {}
+
     async verifyWorkSpaceId(workspaceId: number) {
         const existWorkspaceId = await this.workspacesRepository.findOne({
             where: { id: workspaceId },
