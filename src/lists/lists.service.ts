@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { ListsModel } from './entities/lists.entity';
 import { WorkspacesModel } from 'src/workspaces/entities/workspaces.entity';
 import { CreateListDto } from './dto/create-list.dto';
+import { UpdateListDto } from './dto/update-list.dto';
 
 @Injectable()
 export class ListsService {
@@ -28,6 +29,13 @@ export class ListsService {
         return await this.listsRepository.find({ where: { workspaceId: workspaceId } });
     }
 
+    async updateList(workspaceId: number, listId: number, updateListDto: UpdateListDto) {
+        await this.verifyWorkSpaceId(workspaceId);
+        await this.verifylistId(listId);
+        const list = await this.listsRepository.update({ id: listId }, updateListDto);
+        return { message: 'lsit를 수정했습니다.' };
+    }
+
     async verifyWorkSpaceId(workspaceId: number) {
         const existWorkspaceId = await this.workspacesRepository.findOne({
             where: { id: workspaceId },
@@ -36,5 +44,15 @@ export class ListsService {
             throw new BadRequestException('workSpace를 찾을 수 없습니다.');
         }
         return existWorkspaceId;
+    }
+
+    async verifylistId(listId: number) {
+        const existlistId = await this.listsRepository.findOne({
+            where: { id: listId },
+        });
+        if (!existlistId) {
+            throw new BadRequestException('list를 찾을 수 없습니다.');
+        }
+        return existlistId;
     }
 }
