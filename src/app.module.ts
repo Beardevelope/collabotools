@@ -13,9 +13,13 @@ import { WorkspacesModel } from './workspaces/entities/workspaces.entity';
 import { ListsModel } from './lists/entities/lists.entity';
 import { CardsModel } from './cards/entities/cards.entity';
 import { CommentsModel } from './comments/entities/comments.entity';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
     imports: [
+        ConfigModule.forRoot({
+            isGlobal: true,
+        }),
         AuthModule,
         UsersModule,
         WorkspacesModule,
@@ -23,12 +27,12 @@ import { CommentsModel } from './comments/entities/comments.entity';
         CardsModule,
         CommentsModule,
         TypeOrmModule.forRoot({
-            type: 'mysql',
-            host: 'express-database.cvl4c0czszhc.ap-northeast-2.rds.amazonaws.com',
-            port: 3306,
-            username: 'root',
-            password: '1q2w3e4r',
-            database: 'trello-api',
+            type: process.env.DATABASE_TYPE as 'mysql',
+            host: process.env.DATABASE_HOST,
+            port: parseInt(process.env.DATABASE_HOST),
+            username: process.env.DATABASE_USERNAME,
+            password: process.env.DATABASE_PASSWORD,
+            database: process.env.DATABASE_NAME,
             entities: [UsersModel, WorkspacesModel, ListsModel, CardsModel, CommentsModel],
             synchronize: true,
         }),
