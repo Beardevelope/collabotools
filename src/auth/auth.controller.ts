@@ -1,6 +1,7 @@
 import { Controller, Post, Req, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AccessTokenGuard, RefreshTokenGuard } from './guard/bearer.guard';
+import { BasicTokenGuard } from './guard/basic.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -12,7 +13,7 @@ export class AuthController {
      * @returns
      */
     @Post('login')
-    @UseGuards(AccessTokenGuard)
+    @UseGuards(BasicTokenGuard)
     login(@Req() req: Request) {
         return {
             accessToken: this.authService.signToken(req['user'], false),
