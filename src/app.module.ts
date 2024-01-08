@@ -14,6 +14,7 @@ import { ListsModel } from './lists/entities/lists.entity';
 import { CardsModel } from './cards/entities/cards.entity';
 import { CommentsModel } from './comments/entities/comments.entity';
 import { ConfigModule } from '@nestjs/config';
+import { JwtModule } from '@nestjs/jwt';
 
 @Module({
     imports: [
@@ -35,6 +36,10 @@ import { ConfigModule } from '@nestjs/config';
             database: process.env.DATABASE_NAME,
             entities: [UsersModel, WorkspacesModel, ListsModel, CardsModel, CommentsModel],
             synchronize: true,
+        }),
+        JwtModule.register({
+            global: true,
+            secret: process.env.JWT_SECRET_KEY,
         }),
     ],
     controllers: [AppController],
