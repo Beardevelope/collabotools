@@ -28,4 +28,9 @@ export class ListsController {
     ) {
         return this.listsService.updateList(workSpaceId, listId, updateListDto);
     }
+
+    @Delete('/:listId')
+    deleteList(@Param('workSpaceId') workSpaceId: number, @Param('listId') listId: number) {
+        return this.listsService.deleteList(workSpaceId, listId);
+    }
 }

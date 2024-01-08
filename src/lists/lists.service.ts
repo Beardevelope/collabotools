@@ -32,8 +32,15 @@ export class ListsService {
     async updateList(workspaceId: number, listId: number, updateListDto: UpdateListDto) {
         await this.verifyWorkSpaceId(workspaceId);
         await this.verifylistId(listId);
-        const list = await this.listsRepository.update({ id: listId }, updateListDto);
+        await this.listsRepository.update({ id: listId }, updateListDto);
         return { message: 'lsit를 수정했습니다.' };
+    }
+
+    async deleteList(workspaceId: number, listId: number) {
+        await this.verifyWorkSpaceId(workspaceId);
+        await this.verifylistId(listId);
+        await this.listsRepository.delete({ id: listId });
+        return { message: 'lsit를 삭제했습니다.' };
     }
 
     async verifyWorkSpaceId(workspaceId: number) {
