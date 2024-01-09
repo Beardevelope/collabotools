@@ -1,6 +1,7 @@
 import { Controller, Post, Get, Put, Delete, Param, Body } from '@nestjs/common';
 import { CreateListDto } from './dto/create-list.dto';
 import { UpdateListDto } from './dto/update-list.dto';
+import { OrderListDto } from './dto/order-list.dto';
 import { ListsService } from './lists.service';
 
 @Controller('workspaces/:workspaceId/list')
@@ -34,12 +35,12 @@ export class ListsController {
         return this.listsService.deleteList(workSpaceId, listId);
     }
 
-    @Put('/order')
+    @Put('/:listId/order')
     updateListOrder(
-        @Param('workSpaceId') workSpaceId: number,
+        @Param('workspaceId') workspaceId: number,
         @Param('listId') listId: number,
-        @Body() updateListDto: UpdateListDto,
+        @Body() orderListDto: OrderListDto,
     ) {
-        return this.listsService.updateListOrder(workSpaceId, listId);
+        return this.listsService.updateListOrder(workspaceId, listId, orderListDto);
     }
 }

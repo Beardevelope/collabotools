@@ -5,6 +5,7 @@ import { ListsModel } from './entities/lists.entity';
 import { WorkspacesModel } from 'src/workspaces/entities/workspaces.entity';
 import { CreateListDto } from './dto/create-list.dto';
 import { UpdateListDto } from './dto/update-list.dto';
+import { OrderListDto } from './dto/order-list.dto';
 
 @Injectable()
 export class ListsService {
@@ -43,7 +44,18 @@ export class ListsService {
         return { message: 'lsit를 삭제했습니다.' };
     }
 
-    async updateListOrder(workspaceId: number, listId: number) {}
+    async updateListOrder(workspaceId: number, listId: number, orderListDto: OrderListDto) {
+        await this.verifyWorkSpaceId(workspaceId);
+        await this.verifylistId(listId);
+        await this.listsRepository.update({ id: listId }, orderListDto);
+        console.log(workspaceId);
+        return await this.listsRepository.find({
+            where: { workspaceId: workspaceId },
+            order: {
+                order: 'ASC',
+            },
+        });
+    }
 
     async verifyWorkSpaceId(workspaceId: number) {
         const existWorkspaceId = await this.workspacesRepository.findOne({
