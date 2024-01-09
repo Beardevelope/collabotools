@@ -4,9 +4,10 @@ import { CommentsController } from './comments.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CardsModel } from 'src/cards/entities/cards.entity';
 import { CommentsModel } from './entities/comments.entity';
+import { AuthModule } from 'src/auth/auth.module';
 
 @Module({
-    imports: [TypeOrmModule.forFeature([CardsModel, CommentsModel])],
+    imports: [TypeOrmModule.forFeature([CardsModel, CommentsModel]), AuthModule],
     controllers: [CommentsController],
     providers: [CommentsService],
 })

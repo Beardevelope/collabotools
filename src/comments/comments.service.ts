@@ -16,8 +16,8 @@ export class CommentsService {
         return comments;
     }
 
-    async createComment(userId: number, createCommentDto: CreateCommentDto) {
-        const comment = this.commentRepository.create({ userId, ...createCommentDto });
+    async createComment(userId: number, cardId: number, createCommentDto: CreateCommentDto) {
+        const comment = this.commentRepository.create({ userId, cardId, ...createCommentDto });
         return this.commentRepository.save(comment);
     }
 

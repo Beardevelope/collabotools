@@ -8,12 +8,15 @@ import {
     Post,
     Put,
     Request,
+    UseGuards,
 } from '@nestjs/common';
 import { CommentsService } from './comments.service';
 import { CreateCommentDto } from './dtos/create-comment.dto';
 import { CommentsModel } from './entities/comments.entity';
+import { AccessTokenGuard } from 'src/auth/guard/bearer.guard';
 
 @Controller('comments')
+@UseGuards(AccessTokenGuard)
 export class CommentsController {
     constructor(private readonly commentsService: CommentsService) {}
 
@@ -28,8 +31,8 @@ export class CommentsController {
         @Param('cardId') cardId: number,
         @Body() createCommentDto: CreateCommentDto,
     ) {
-        const userId = req.user.id;
-        const comment = await this.commentsService.createComment(userId, createCommentDto);
+        const userId = req.userId;
+        const comment = await this.commentsService.createComment(userId, cardId, createCommentDto);
 
         return {
             statusCode: HttpStatus.CREATED,
@@ -38,7 +41,7 @@ export class CommentsController {
         };
     }
 
-    @Put(':id')
+    @Put(':cardId/:id')
     async updateComment(@Param('id') id: number, @Body() updatedComment: CommentsModel) {
         const comment = await this.commentsService.updateComment(id, updatedComment);
         return {
@@ -48,8 +51,9 @@ export class CommentsController {
         };
     }
 
-    @Delete(':id')
-    async deleteComment(@Param('id') id: number): Promise<void> {
+    @Delete(':cardId/:id')
+    async deleteComment(@Param('id') id: number) {
         await this.commentsService.deleteComment(id);
+        return { message: '댓글이 삭제되었습니다.' };
     }
 }
