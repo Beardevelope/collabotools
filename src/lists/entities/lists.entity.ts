@@ -22,7 +22,7 @@ export class ListsModel extends BaseModel {
     /**
      * 워크스페이스
      */
-    @ManyToOne(() => WorkspacesModel)
+    @ManyToOne(() => WorkspacesModel, { onDelete: 'CASCADE' })
     workspace: WorkspacesModel;
 
     @OneToMany(() => CardsModel, (cards) => cards.list)
