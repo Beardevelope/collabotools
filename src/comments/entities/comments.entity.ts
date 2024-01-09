@@ -1,17 +1,43 @@
-import { IsString } from 'class-validator';
-import { BaseModel } from 'src/common/entities/base.entity';
+import { IsNotEmpty, IsString } from 'class-validator';
+import { CardsModel } from 'src/cards/entities/cards.entity';
 import { UsersModel } from 'src/users/entities/users.entity';
-import { Column, Entity, ManyToOne } from 'typeorm';
+import {
+    Column,
+    CreateDateColumn,
+    Entity,
+    PrimaryGeneratedColumn,
+    UpdateDateColumn,
+    ManyToOne,
+} from 'typeorm';
 
-@Entity()
-export class CommentsModel extends BaseModel {
+@Entity('comments')
+export class CommentsModel {
+    @PrimaryGeneratedColumn()
+    id: number;
+
     @Column()
+    userId: number;
+
+    @Column()
+    cardId: number;
+
+    @IsNotEmpty({ message: '댓글 내용을 입력해주세요.' })
     @IsString()
+    @Column()
     content: string;
+
+    @CreateDateColumn()
+    createdAt: Date;
+
+    @UpdateDateColumn()
+    updatedAt: Date;
 
     /**
      * 덧글 생성자
      */
-    @ManyToOne(() => UsersModel, (user) => user.comments)
+    @ManyToOne(() => UsersModel, (user) => user.comments, { onDelete: 'CASCADE' })
     user: UsersModel;
+
+    @ManyToOne(() => CardsModel, (card) => card.comments, { onDelete: 'CASCADE' })
+    card: CardsModel;
 }
