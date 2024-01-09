@@ -1,5 +1,5 @@
 import { HttpException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
-import { DataSource, Repository, getConnection } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { WorkspacesModel } from './entities/workspaces.entity';
 import { CreateWorkspaceDto } from './dto/create-workspace.dto';
@@ -19,34 +19,86 @@ export class WorkspacesService {
         private readonly dataSource: DataSource,
       ) {}
     
-      async createWorkspace(createworkspaceDto:CreateWorkspaceDto) {
+      /**
+       * 워크스페이스 생성
+       * 
+       */
+      async createWorkspace(userId:number,createworkspaceDto:CreateWorkspaceDto) {
 
-        const workspace = this.workspaceRepository.create({
-                        name:createworkspaceDto.name,
-                        description:createworkspaceDto.description,
-                        color:createworkspaceDto.color
-                    });
+        const queryRunner = this.dataSource.createQueryRunner();
 
-        // TODO: worksapce 추가시 ownerId 추가 어떻게? 인가된 값으로 추가
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
 
-        // TODO: 작성자 멤버(users_model_workspaces_workspaces_model)도 owner에 저장하는 로직 추가!!!!
+        try{
 
+          const workspace = this.workspaceRepository.create({
+            name:createworkspaceDto.name,
+            description:createworkspaceDto.description,
+            color:createworkspaceDto.color,
+            ownerId:userId
+          });
 
+          // workspace 정보 저장
+          await queryRunner.manager.save(WorkspacesModel,workspace);
 
-        // workspace 정보 저장
-        await this.workspaceRepository.save(workspace);
+          const newWorkSapceId = await queryRunner.manager
+          .createQueryBuilder()
+          .select([
+            'MAX(workspaces_model.id) AS max_id',
+          ])
+          .from(WorkspacesModel, 'workspaces_model')
+          .where('workspaces_model.ownerId = :userId', { userId })
+          .getRawMany();
 
+          // users_model_workspaces_workspaces_model에도 멤버 정보 저장
+          await queryRunner.manager
+          .createQueryBuilder()
+          .insert()
+          .into('users_model_workspaces_workspaces_model')
+          .values(
+              {
+                usersModelId:userId,
+                workspacesModelId:newWorkSapceId[0].max_id
+              }
+            )
+          .execute();
 
-        return {
-          "message":"워크스페이스를 생성했습니다.",
-          "data": workspace
+          await queryRunner.commitTransaction();
+
+          return {
+            "message":"워크스페이스를 생성했습니다.",
+            "data": workspace
+          }
+
+        }catch(error){
+
+          await queryRunner.rollbackTransaction();
+          console.log(`error : ${error}`)
+          if (error instanceof HttpException) {
+            // HttpException을 상속한 경우(statusCode 속성이 있는 경우)
+            throw error;
+          } else {
+            // 그 외의 예외
+            throw new InternalServerErrorException('서버 에러가 발생했습니다.');
+          }
+
+        }finally{
+          await queryRunner.release();
         }
     
     }
 
-    async findAllWorkspace() {
+    /**
+     * 워크스페이스 조회
+     * 
+     */
+    async findAllWorkspace(userId:number) {
         const workspaces = await this.workspaceRepository.find({
-            select:['id','name']
+            select:['id','name'],
+            where: {
+              ownerId: userId, 
+            },
         });
       
         return {
@@ -55,7 +107,13 @@ export class WorkspacesService {
         }
     }
 
-    async updateWorkspace(workspaceId: number, createworkspaceDto:CreateWorkspaceDto) {
+    /**
+     * 워크스페이스 수정
+     * 
+     */
+    async updateWorkspace(userId:number,workspaceId: number, createworkspaceDto:CreateWorkspaceDto) {
+
+      await this.isOwner(userId,workspaceId);
 
         const workspace = await this.verifyWorkSpaceById(workspaceId);
       
@@ -72,7 +130,13 @@ export class WorkspacesService {
 
     }
 
-    async deleteWorkspace(workspaceId: number) {
+    /**
+     * 워크스페이스 삭제
+     * 
+     */
+    async deleteWorkspace(userId:number,workspaceId: number) {
+
+      await this.isOwner(userId,workspaceId);
 
       const queryRunner = this.dataSource.createQueryRunner();
 
@@ -82,7 +146,7 @@ export class WorkspacesService {
       try{
         await this.verifyWorkSpaceById(workspaceId);
 
-        await queryRunner.manager.delete(ListsModel,{workspaceId:workspaceId});
+        await queryRunner.manager.delete('users_model_workspaces_workspaces_model', { workspacesModelId: workspaceId });
 
         await queryRunner.manager.delete(WorkspacesModel,{id:workspaceId});
 
@@ -107,13 +171,28 @@ export class WorkspacesService {
       }
     }
 
-    async inviteMembers(membersDto:MembersDto) {
+    async inviteMembers(userId:number,workspaceId:number,membersDto:MembersDto) {
+
+      await this.isOwner(userId,workspaceId);
 
       const members = membersDto.members;
+      const isSpaceMembers = await this.listWorkSpaceMember(workspaceId);
 
-      const values = members.map(({ userId, workspaceId }) => ({
-        usersModelId: userId,
-        workspacesModelId: workspaceId,
+      const values = await Promise.all(members.map(async (memberId) => {
+        await this.findByUserId(memberId);
+        
+        // workSpaceMembers 배열에서 user_id가 memberId와 일치하는 사용자 찾기
+        const isUserInWorkSpaceMembers = isSpaceMembers.some(member => member.user_id === memberId);
+
+        if (isUserInWorkSpaceMembers) {
+          // 사용자가 workSpaceMembers 배열에 존재하지 않는 경우에 대한 처리
+          throw new NotFoundException(`사용자 ID ${memberId} (이)가 워크스페이스 멤버로 이미 있습니다.`);
+        }
+      
+        return {
+          usersModelId: memberId,
+          workspacesModelId: workspaceId,
+        };
       }));
 
       const queryRunner = this.dataSource.createQueryRunner();
@@ -123,7 +202,7 @@ export class WorkspacesService {
 
       try{
 
-        // TODO: 멤버 추가시 동일 워크스페이스에 기존 등록한 멤버 있는지 확인
+        console.log(`values : ${values}`);
 
         await queryRunner.manager
         .createQueryBuilder()
@@ -141,12 +220,14 @@ export class WorkspacesService {
       }catch(error){
         await queryRunner.rollbackTransaction();
 
+        console.log(`error : ${error.name}`);
+
         if (error instanceof HttpException) {
           // HttpException을 상속한 경우(statusCode 속성이 있는 경우)
           throw error;
         } else {
           // 그 외의 예외
-          throw new InternalServerErrorException('서버 에러가 발생했습니다.');
+          new InternalServerErrorException('서버 에러가 발생했습니다.');
         }
       }finally{
         await queryRunner.release();
@@ -163,14 +244,108 @@ export class WorkspacesService {
         return workspace;
     }
 
-    private async findByEmail(email: string) {
-      const user = await this.userRepository.findOneBy({ email });
+    private async findByUserId(userId: number) {
 
-      if (!user) {
-        throw new NotFoundException('존재하지 않는 사용자입니다.');
+      const queryRunner = this.dataSource.createQueryRunner();
+
+      await queryRunner.connect();
+      await queryRunner.startTransaction();
+
+      try{
+
+        const user = await queryRunner.manager
+        .createQueryBuilder()
+        .select([
+          'id AS user_id',
+          'email AS email',
+          'name AS name',
+        ])
+        .from(UsersModel, 'users_model')
+        .where('users_model.id = :userId', { userId })
+        .getRawMany();
+
+        console.log(`user:${user[0].user_id}`)
+        if (!user[0].user_id) {
+          throw new NotFoundException('존재하지 않는 사용자입니다.');
+        }
+  
+        await queryRunner.commitTransaction();
+
+        return user;
+
+      }catch(error){
+
+        console.log(`error22222 : ${error}`);
+
+        await queryRunner.rollbackTransaction();
+
+        if (error instanceof HttpException) {
+          // HttpException을 상속한 경우(statusCode 속성이 있는 경우)
+          throw error;
+        } else {
+          // 그 외의 예외
+          if(error.name==='TypeError') throw new NotFoundException(`가입 안된 사용자 ID (userId:${userId})가 있습니다.`);
+          else throw new InternalServerErrorException('서버 에러가 발생했습니다.');
+        }
+
+      }finally{
+        await queryRunner.release();
+      }
+    }
+
+    async isOwner(userId:number,workspaceId:number){
+
+      const owner = await this.workspaceRepository.findOneBy({
+        ownerId:userId,
+        id:workspaceId
+      })
+
+      if(!owner){
+        throw new NotFoundException('워크스페이스 운영자가 아닙니다.');
       }
 
-      return user;
+      return true;
+
+    }
+
+    async listWorkSpaceMember(workspaceId:number){
+
+      const queryRunner = this.dataSource.createQueryRunner();
+
+      await queryRunner.connect();
+      await queryRunner.startTransaction();
+
+      try{
+
+        const user = await queryRunner.manager
+        .createQueryBuilder()
+        .select([
+          'usersModelId AS user_id'
+        ])
+        .from('users_model_workspaces_workspaces_model', 'users_model')
+        .where('users_model.workspacesModelId = :workspaceId', { workspaceId })
+        .getRawMany();
+  
+        await queryRunner.commitTransaction();
+
+        return user;
+
+      }catch(error){
+
+        await queryRunner.rollbackTransaction();
+
+        if (error instanceof HttpException) {
+          // HttpException을 상속한 경우(statusCode 속성이 있는 경우)
+          throw error;
+        } else {
+          // 그 외의 예외
+          throw new InternalServerErrorException('서버 에러가 발생했습니다.');
+        }
+
+      }finally{
+        await queryRunner.release();
+      }
+
     }
 
 }
