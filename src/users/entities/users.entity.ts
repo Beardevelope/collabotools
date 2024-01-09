@@ -1,3 +1,4 @@
+import { Exclude } from 'class-transformer';
 import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
 import { CardsModel } from 'src/cards/entities/cards.entity';
 import { CommentsModel } from 'src/comments/entities/comments.entity';
@@ -16,6 +17,9 @@ export class UsersModel extends BaseModel {
     @Column()
     @IsString()
     @IsNotEmpty()
+    @Exclude({
+        toPlainOnly: true,
+    })
     password: string;
 
     @Column()

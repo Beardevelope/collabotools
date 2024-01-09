@@ -1,10 +1,11 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { CreateUsersDto } from './dto/create-users.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UsersModel } from './entities/users.entity';
 import { DUPLICATE_EMAIL, PASSWORD_NOT_MATCH } from './const/users-exception-message';
 import * as bcrypt from 'bcrypt';
+import { SUCCESS_DELETE } from './const/users-success.message';
 
 @Injectable()
 export class UsersService {
@@ -52,5 +53,36 @@ export class UsersService {
                 email,
             },
         });
+    }
+
+    /**
+     * userId로 유저 상세조회
+     * @param id
+     */
+    getUser(id: number) {
+        return this.usersRepository.findOne({
+            where: {
+                id,
+            },
+        });
+    }
+
+    updateUser(id: number) {}
+
+    /**
+     * 유저 삭제
+     * @param id
+     * @returns
+     */
+    deleteUser(id: number) {
+        try {
+            this.usersRepository.delete({
+                id,
+            });
+
+            return SUCCESS_DELETE;
+        } catch (err) {
+            throw new InternalServerErrorException(err);
+        }
     }
 }
