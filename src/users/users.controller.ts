@@ -2,6 +2,7 @@ import { Body, Controller, Delete, Get, Patch, Post, Req, UseGuards } from '@nes
 import { UsersService } from './users.service';
 import { CreateUsersDto } from './dto/create-users.dto';
 import { BearerTokenGuard } from 'src/auth/guard/bearer.guard';
+import { UpdateUsersDto } from './dto/update-users.dto';
 
 @Controller('users')
 export class UsersController {
@@ -29,8 +30,8 @@ export class UsersController {
 
     @Patch('user')
     @UseGuards(BearerTokenGuard)
-    upadteUser(@Req() req: Request) {
-        return this.usersService.updateUser(req['userId']);
+    upadteUser(@Body() updateUsersDto: UpdateUsersDto, @Req() req: Request) {
+        return this.usersService.updateUser(req['userId'], updateUsersDto);
     }
 
     /**

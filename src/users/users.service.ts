@@ -5,7 +5,8 @@ import { Repository } from 'typeorm';
 import { UsersModel } from './entities/users.entity';
 import { DUPLICATE_EMAIL, PASSWORD_NOT_MATCH } from './const/users-exception-message';
 import * as bcrypt from 'bcrypt';
-import { SUCCESS_DELETE } from './const/users-success.message';
+import { SUCCESS_DELETE, SUCCESS_UPDATE } from './const/users-success.message';
+import { UpdateUsersDto } from './dto/update-users.dto';
 
 @Injectable()
 export class UsersService {
@@ -67,7 +68,19 @@ export class UsersService {
         });
     }
 
-    updateUser(id: number) {}
+    /**
+     * 유저 정보 업데이트
+     * @param id
+     */
+    updateUser(id: number, updateUsersDto: UpdateUsersDto) {
+        try {
+            this.usersRepository.update({ id }, { ...updateUsersDto });
+
+            return SUCCESS_UPDATE;
+        } catch (err) {
+            throw new InternalServerErrorException(err);
+        }
+    }
 
     /**
      * 유저 삭제
