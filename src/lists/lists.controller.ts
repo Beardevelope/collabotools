@@ -23,16 +23,16 @@ export class ListsController {
 
     @Put('/:listId')
     async updateList(
-        @Param('workSpaceId') workSpaceId: number,
+        @Param('workspaceId') workspaceId: number,
         @Param('listId') listId: number,
         @Body() updateListDto: UpdateListDto,
     ) {
-        return this.listsService.updateList(workSpaceId, listId, updateListDto);
+        return this.listsService.updateList(workspaceId, listId, updateListDto);
     }
 
     @Delete('/:listId')
-    deleteList(@Param('workSpaceId') workSpaceId: number, @Param('listId') listId: number) {
-        return this.listsService.deleteList(workSpaceId, listId);
+    deleteList(@Param('workspaceId') workspaceId: number, @Param('listId') listId: number) {
+        return this.listsService.deleteList(workspaceId, listId);
     }
 
     @Put('/:listId/order')

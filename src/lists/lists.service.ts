@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ListsModel } from './entities/lists.entity';
@@ -27,28 +27,32 @@ export class ListsService {
 
     async findAllLists(workspaceId: number) {
         await this.verifyWorkSpaceId(workspaceId);
-        return await this.listsRepository.find({ where: { workspaceId: workspaceId } });
+        return await this.listsRepository.find({
+            where: { workspaceId: workspaceId },
+            order: {
+                order: 'ASC',
+            },
+        });
     }
 
     async updateList(workspaceId: number, listId: number, updateListDto: UpdateListDto) {
         await this.verifyWorkSpaceId(workspaceId);
-        await this.verifylistId(listId);
+        await this.verifylistIdAndWorkspaceId(listId, workspaceId);
         await this.listsRepository.update({ id: listId }, updateListDto);
         return { message: 'lsit를 수정했습니다.' };
     }
 
     async deleteList(workspaceId: number, listId: number) {
         await this.verifyWorkSpaceId(workspaceId);
-        await this.verifylistId(listId);
+        await this.verifylistIdAndWorkspaceId(listId, workspaceId);
         await this.listsRepository.delete({ id: listId });
         return { message: 'lsit를 삭제했습니다.' };
     }
 
     async updateListOrder(workspaceId: number, listId: number, orderListDto: OrderListDto) {
         await this.verifyWorkSpaceId(workspaceId);
-        await this.verifylistId(listId);
+        await this.verifylistIdAndWorkspaceId(listId, workspaceId);
         await this.listsRepository.update({ id: listId }, orderListDto);
-        console.log(workspaceId);
         return await this.listsRepository.find({
             where: { workspaceId: workspaceId },
             order: {
@@ -67,13 +71,13 @@ export class ListsService {
         return existWorkspaceId;
     }
 
-    async verifylistId(listId: number) {
-        const existlistId = await this.listsRepository.findOne({
-            where: { id: listId },
+    async verifylistIdAndWorkspaceId(listId: number, workspaceId: number) {
+        const existlistIdAndWorkspaceId = await this.listsRepository.findOne({
+            where: { id: listId, workspaceId },
         });
-        if (!existlistId) {
+        if (!existlistIdAndWorkspaceId) {
             throw new BadRequestException('list를 찾을 수 없습니다.');
         }
-        return existlistId;
+        return existlistIdAndWorkspaceId;
     }
 }
