@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { ClassSerializerInterceptor, Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
@@ -14,6 +14,8 @@ import { ListsModel } from './lists/entities/lists.entity';
 import { CardsModel } from './cards/entities/cards.entity';
 import { CommentsModel } from './comments/entities/comments.entity';
 import { ConfigModule } from '@nestjs/config';
+import { JwtModule } from '@nestjs/jwt';
+import { APP_INTERCEPTOR } from '@nestjs/core';
 
 @Module({
     imports: [
@@ -36,8 +38,12 @@ import { ConfigModule } from '@nestjs/config';
             entities: [UsersModel, WorkspacesModel, ListsModel, CardsModel, CommentsModel],
             synchronize: true,
         }),
+        JwtModule.register({
+            global: true,
+            secret: process.env.JWT_SECRET_KEY,
+        }),
     ],
     controllers: [AppController],
-    providers: [AppService],
+    providers: [AppService, { provide: APP_INTERCEPTOR, useClass: ClassSerializerInterceptor }],
 })
 export class AppModule {}
