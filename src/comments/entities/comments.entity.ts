@@ -9,6 +9,9 @@ export class CommentsModel extends BaseModel {
     @IsString()
     content: string;
 
+    /**
+     * 덧글 생성자
+     */
     @ManyToOne(() => UsersModel, (user) => user.comments)
     user: UsersModel;
 }

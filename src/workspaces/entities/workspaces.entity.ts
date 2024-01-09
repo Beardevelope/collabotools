@@ -33,6 +33,8 @@ export class WorkspacesModel extends BaseModel {
     /**
      * 리스트
      */
-    @OneToMany(() => ListsModel, (list) => list.workspace)
+    @OneToMany(() => ListsModel, (list) => list.workspace,{
+        onDelete:'CASCADE'
+    })
     lists: ListsModel[];
 }
