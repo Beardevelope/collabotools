@@ -171,6 +171,10 @@ export class WorkspacesService {
       }
     }
 
+    /**
+     * 워크스페이스 멤버 추가
+     * 
+     */
     async inviteMembers(userId:number,workspaceId:number,membersDto:MembersDto) {
 
       await this.isOwner(userId,workspaceId);
@@ -235,6 +239,10 @@ export class WorkspacesService {
   
   } 
 
+    /**
+     * 워크스페이스 존재여부 확인
+     * 
+     */
     private async verifyWorkSpaceById(id: number) {
         const workspace = await this.workspaceRepository.findOneBy({ id });
         if (!workspace) {
@@ -244,6 +252,10 @@ export class WorkspacesService {
         return workspace;
     }
 
+    /**
+     * 사용자 ID 검증 (회원가입된 사용자 인지 확인)
+     * 
+     */
     private async findByUserId(userId: number) {
 
       const queryRunner = this.dataSource.createQueryRunner();
@@ -293,7 +305,11 @@ export class WorkspacesService {
       }
     }
 
-    async isOwner(userId:number,workspaceId:number){
+    /**
+     * 워크스페이스 운영자 검증
+     * 
+     */
+    private async isOwner(userId:number,workspaceId:number){
 
       const owner = await this.workspaceRepository.findOneBy({
         ownerId:userId,
@@ -308,7 +324,11 @@ export class WorkspacesService {
 
     }
 
-    async listWorkSpaceMember(workspaceId:number){
+    /**
+     * 워크스페이스 멤버 검증
+     * 
+     */
+    private async listWorkSpaceMember(workspaceId:number){
 
       const queryRunner = this.dataSource.createQueryRunner();
 
