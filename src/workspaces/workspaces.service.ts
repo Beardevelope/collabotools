@@ -94,12 +94,10 @@ export class WorkspacesService {
      * 
      */
     async findAllWorkspace(userId:number) {
-        const workspaces = await this.workspaceRepository.find({
-            select:['id','name'],
-            where: {
-              ownerId: userId, 
-            },
-        });
+        const workspaces = await this.workspaceRepository.createQueryBuilder('workspaces_model')
+        .select(['workspaces_model.id', 'workspaces_model.name'])
+        .where('workspaces_model.id IN (SELECT uww.workspacesModelId FROM users_model_workspaces_workspaces_model uww WHERE uww.usersModelId = :userId)', { userId })
+        .getMany();
       
         return {
           "message":"워크스페이스를 조회했습니다.",
