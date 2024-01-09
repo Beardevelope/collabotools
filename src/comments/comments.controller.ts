@@ -2,6 +2,7 @@ import {
     Body,
     Controller,
     Delete,
+    ForbiddenException,
     Get,
     HttpStatus,
     Param,
@@ -16,7 +17,6 @@ import { CommentsModel } from './entities/comments.entity';
 import { AccessTokenGuard } from 'src/auth/guard/bearer.guard';
 
 @Controller('comments')
-@UseGuards(AccessTokenGuard)
 export class CommentsController {
     constructor(private readonly commentsService: CommentsService) {}
 
@@ -25,6 +25,7 @@ export class CommentsController {
         return this.commentsService.getAllCommentsByCardId(cardId);
     }
 
+    @UseGuards(AccessTokenGuard)
     @Post(':cardId')
     async createComment(
         @Request() req,
@@ -41,9 +42,18 @@ export class CommentsController {
         };
     }
 
+    @UseGuards(AccessTokenGuard)
     @Put(':cardId/:id')
-    async updateComment(@Param('id') id: number, @Body() updatedComment: CommentsModel) {
+    async updateComment(
+        @Request() req,
+        @Param('id') id: number,
+        @Body() updatedComment: CommentsModel,
+    ) {
         const comment = await this.commentsService.updateComment(id, updatedComment);
+        if (comment.userId !== req.userId) {
+            throw new ForbiddenException('권한이 없습니다.');
+        }
+
         return {
             statusCode: HttpStatus.OK,
             message: '댓글이 수정되었습니다.',
@@ -51,9 +61,18 @@ export class CommentsController {
         };
     }
 
+    @UseGuards(AccessTokenGuard)
     @Delete(':cardId/:id')
-    async deleteComment(@Param('id') id: number) {
+    async deleteComment(@Request() req, @Param('id') id: number) {
+        const comment = await this.commentsService.getCommentById(id);
+        if (comment.userId !== req.userId) {
+            throw new ForbiddenException('권한이 없습니다.');
+        }
+
         await this.commentsService.deleteComment(id);
-        return { message: '댓글이 삭제되었습니다.' };
+        return {
+            statusCode: HttpStatus.OK,
+            message: '댓글이 삭제되었습니다.',
+        };
     }
 }
