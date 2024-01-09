@@ -27,7 +27,7 @@ export class CardsModel extends BaseModel {
     /**
      * 리스트
      */
-    @ManyToOne(() => ListsModel, (list) => list.cards)
+    @ManyToOne(() => ListsModel, (list) => list.cards, { onDelete: 'CASCADE' })
     list: ListsModel;
 
     /**
