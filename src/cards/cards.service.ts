@@ -40,6 +40,7 @@ export class CardsService {
             title: createCardDto.title,
             description: createCardDto.description,
             color: createCardDto.color,
+            deadline: createCardDto.deadline, // jihye: 마감일 추가
             order: newLexoRank.toString(),
             user: {
                 id: userId,
@@ -52,7 +53,9 @@ export class CardsService {
         // 정의된 카드 repository에 save
         await this.cardRepository.save(card);
 
-        return { card, message: '카드 생성 완료' };
+        const daysLeft = this.calculateDaysLeft(card.deadline);
+
+        return { card, daysLeft, message: '카드 생성 완료' };
     }
 
     async getAllcards(listId: number) {
@@ -93,8 +96,8 @@ export class CardsService {
         const card = await this.availableCardById(id);
         this.cardRepository.merge(card, updateCardDto);
         const updatedCard = this.cardRepository.save(card);
-
-        return { updatedCard, message: '카드가 정상적으로 수정되었습니다.' };
+        const daysLeft = this.calculateDaysLeft(card.deadline); // jihye: 마감일 디데이 추가
+        return { updatedCard, daysLeft, message: '카드가 정상적으로 수정되었습니다.' };
     }
 
     /**
@@ -176,5 +179,25 @@ export class CardsService {
         }
 
         await this.cardRepository.update({ id: cardId }, { order: moveLexoRank.toString() });
+    }
+
+    /**
+     * jihye
+     * D-day 추가
+     */
+    private calculateDaysLeft(deadline: Date): number | { message: string } {
+        const currentDate = new Date();
+        const deadlineDate = new Date(deadline);
+
+        // 디데이 계산
+        const daysLeft = Math.ceil(
+            (deadlineDate.getTime() - currentDate.getTime()) / (1000 * 3600 * 24),
+        );
+
+        if (daysLeft === 0) {
+            return { message: '마감일이 오늘입니다.' };
+        }
+
+        return daysLeft >= 0 ? daysLeft : { message: '마감 기한이 지났습니다.' };
     }
 }

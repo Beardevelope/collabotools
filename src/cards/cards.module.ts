@@ -6,16 +6,9 @@ import { CardsModel } from './entities/cards.entity';
 import { ListsModule } from 'src/lists/lists.module';
 import { UsersModule } from 'src/users/users.module';
 import { AuthModule } from 'src/auth/auth.module';
-import { CommentsModule } from 'src/comments/comments.module';
 
 @Module({
-    imports: [
-        TypeOrmModule.forFeature([CardsModel]),
-        ListsModule,
-        UsersModule,
-        AuthModule,
-        CommentsModule,
-    ],
+    imports: [TypeOrmModule.forFeature([CardsModel]), ListsModule, UsersModule, AuthModule],
     controllers: [CardsController],
     providers: [CardsService],
 })
