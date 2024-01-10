@@ -68,6 +68,12 @@ export class CardsService {
         return { foundCard, message: '카드 목록 조회 성공' };
     }
 
+    /**
+     *
+     * @param id
+     * @returns
+     */
+
     async findOneById(id: number) {
         const card = await this.cardRepository.findOneBy({ id });
 
