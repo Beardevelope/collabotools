@@ -1,4 +1,4 @@
-import { IsNumber, IsString } from 'class-validator';
+import { IsString } from 'class-validator';
 import { BaseModel } from 'src/common/entities/base.entity';
 import { ListsModel } from 'src/lists/entities/lists.entity';
 import { UsersModel } from 'src/users/entities/users.entity';
@@ -14,11 +14,8 @@ export class CardsModel extends BaseModel {
     @IsString()
     description: string;
 
-    @Column({
-        default: 1,
-    })
-    @IsNumber()
-    order: number;
+    @Column()
+    order: string;
 
     @Column()
     @IsString()
@@ -27,7 +24,7 @@ export class CardsModel extends BaseModel {
     /**
      * 리스트
      */
-    @ManyToOne(() => ListsModel, (list) => list.cards)
+    @ManyToOne(() => ListsModel, (list) => list.cards, { onDelete: 'CASCADE' })
     list: ListsModel;
 
     /**
@@ -36,6 +33,8 @@ export class CardsModel extends BaseModel {
     @ManyToOne(() => UsersModel, (user) => user.cards)
     user: UsersModel;
 
-    @ManyToMany(() => UsersModel, (user) => user.works)
+    @ManyToMany(() => UsersModel, (user) => user.works, {
+        eager: true,
+    })
     workers: UsersModel[];
 }
