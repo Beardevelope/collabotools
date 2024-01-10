@@ -1,8 +1,8 @@
-import { IsString } from 'class-validator';
+import { IsNumber, IsString } from 'class-validator';
 import { BaseModel } from 'src/common/entities/base.entity';
 import { ListsModel } from 'src/lists/entities/lists.entity';
 import { UsersModel } from 'src/users/entities/users.entity';
-import { Column, Entity, ManyToMany, ManyToOne, OneToMany } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToMany, ManyToOne, OneToMany } from 'typeorm';
 
 @Entity()
 export class WorkspacesModel extends BaseModel {
@@ -18,10 +18,15 @@ export class WorkspacesModel extends BaseModel {
     @IsString()
     color: string;
 
+    @Column()
+    @IsNumber()
+    ownerId:number;
+
     /**
      * admin
      */
     @ManyToOne(() => UsersModel, (user) => user.myWorkspaces)
+    @JoinColumn({ name: 'ownerId' })
     owner: UsersModel;
 
     /**
@@ -34,7 +39,7 @@ export class WorkspacesModel extends BaseModel {
      * 리스트
      */
     @OneToMany(() => ListsModel, (list) => list.workspace,{
-        onDelete:'CASCADE'
+        cascade: true
     })
     lists: ListsModel[];
 }
