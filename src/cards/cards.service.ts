@@ -24,13 +24,11 @@ export class CardsService {
             },
         });
 
-        console.log(findCards.length);
-
         let newLexoRank: LexoRank;
         if (findCards.length > 0) {
             newLexoRank = LexoRank.parse(findCards[findCards.length - 1].order).genNext();
         } else {
-            newLexoRank = LexoRank.min();
+            newLexoRank = LexoRank.middle();
             /**
              *  min말고 middle로 하는 경우가 좋다고함.
              * update시에 0.10000e 식으로 나오는걸 lexoRankParse 를 검색해보기.
@@ -86,24 +84,22 @@ export class CardsService {
     }
 
     async updateCard(id: number, updateCardDto: UpdateCardDto) {
-        // const card = 수정할 수 있게, 현재 존재하는 카드 정의
-        //const card = await this.availableCardById(id);
-
         const card = await this.availableCardById(id);
         this.cardRepository.merge(card, updateCardDto);
         const updatedCard = this.cardRepository.save(card);
 
         return { updatedCard, message: '카드가 정상적으로 수정되었습니다.' };
     }
+
     /**
-     * 존재하는 카드인지 아닌지 확인 할 수 있는 내부함수
+     * Find By Id(card) 내부함수
      */
     private async availableCardById(id: number) {
         const card = await this.cardRepository.findOne({
             where: {
                 id,
             },
-            //relations: { workers: true },
+            relations: { workers: true },
             // 관계가 없으면 불러올수없음 135
         });
 
@@ -115,7 +111,7 @@ export class CardsService {
     }
 
     /**
-     * 존재하는 유저인지 아닌지 확인 할 수 있는 내부함수
+     *  Find By Id 내부함수
      */
 
     private async availableUserById(userId: number) {
@@ -138,19 +134,13 @@ export class CardsService {
 
         card.workers = [...card.workers, user];
 
-        // const newMember = this.cardRepository.create({
-        //     ...card,
-        //     workers: [card.workers, user],
-        // });
-        //        const newWorkers = [...card.workers, user];
-
         await this.cardRepository.save(card);
-        //({ ...card, workers: [] })
+
         return { newMember: user, message: '작업자 추가' };
     }
 
     async updateCardOrder(listId: number, cardId: number, rankId: string) {
-        const findTest = await this.cardRepository.find({
+        const findAllCard = await this.cardRepository.find({
             where: {
                 list: {
                     id: listId,
@@ -161,21 +151,24 @@ export class CardsService {
             },
         });
 
-        const findCard = await this.cardRepository.findOne({
-            where: {
-                id: cardId,
-                list: {
-                    id: listId,
-                },
-            },
+        /**
+         * 코드 상 끼고싶은 orderId ( y|x 의 x의 값)을 넣어주면 원하는 값 사이에 위치가 이동된다.
+         */
+        const findIdx = findAllCard.findIndex((card) => {
+            return card.order === rankId;
         });
-        const prevLexoRank: LexoRank = LexoRank.parse(rankId);
-        const nextLexoRank: LexoRank = LexoRank.parse(rankId).genNext();
 
-        const moveLexoRank: LexoRank = prevLexoRank.between(nextLexoRank);
+        let moveLexoRank: LexoRank;
+        if (findIdx === 0) {
+            moveLexoRank = LexoRank.parse(findAllCard[findIdx].order).genPrev();
+        } else if (findIdx === findAllCard.length - 1) {
+            moveLexoRank = LexoRank.parse(findAllCard[findIdx].order).genNext();
+        } else {
+            moveLexoRank = LexoRank.parse(findAllCard[findIdx].order).between(
+                LexoRank.parse(findAllCard[findIdx - 1].order),
+            );
+        }
 
-        findCard.order = moveLexoRank.toString();
-
-        await this.cardRepository.update({ id: findCard.id }, { ...findCard });
+        await this.cardRepository.update({ id: cardId }, { order: moveLexoRank.toString() });
     }
 }
