@@ -51,10 +51,6 @@ export class CommentsController {
         @Body()
         updatedComment: CommentsModel,
     ) {
-        console.log({ cardId });
-        console.log({ id });
-        console.log('===============================================================');
-        console.log(req);
         const comment = await this.commentsService.updateComment(id, cardId, updatedComment);
         if (comment.userId !== req.userId) {
             throw new ForbiddenException('권한이 없습니다.');
