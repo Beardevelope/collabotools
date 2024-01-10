@@ -1,7 +1,7 @@
 import { Body, Controller, Delete, Get, Patch, Post, Req, UseGuards } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUsersDto } from './dto/create-users.dto';
-import { BearerTokenGuard } from 'src/auth/guard/bearer.guard';
+import { AccessTokenGuard, BearerTokenGuard } from 'src/auth/guard/bearer.guard';
 
 @Controller('users')
 export class UsersController {
@@ -22,13 +22,13 @@ export class UsersController {
      * @param req
      */
     @Get('user')
-    @UseGuards(BearerTokenGuard)
+    @UseGuards(AccessTokenGuard)
     getUser(@Req() req: Request) {
         return this.usersService.getUser(req['userId']);
     }
 
     @Patch('user')
-    @UseGuards(BearerTokenGuard)
+    @UseGuards(AccessTokenGuard)
     upadteUser(@Req() req: Request) {
         return this.usersService.updateUser(req['userId']);
     }
@@ -39,7 +39,7 @@ export class UsersController {
      * @returns
      */
     @Delete('user')
-    @UseGuards(BearerTokenGuard)
+    @UseGuards(AccessTokenGuard)
     deleteUser(@Req() req: Request) {
         return this.usersService.deleteUser(req['userId']);
     }

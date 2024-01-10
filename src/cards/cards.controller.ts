@@ -19,10 +19,14 @@ import { AccessTokenGuard } from 'src/auth/guard/bearer.guard';
 export class CardsController {
     constructor(private readonly cardsService: CardsService) {}
 
-    @Post()
-    async createCard(@Body() createCardDto: CreateCardDto) {
-        const userId = 1;
-        const listId = 31;
+    @Post('/:listId')
+    @UseGuards(AccessTokenGuard)
+    async createCard(
+        @Body() createCardDto: CreateCardDto,
+        @Req() req: Request,
+        @Param('listId', ParseIntPipe) listId: number,
+    ) {
+        const userId = req['userId'];
 
         return await this.cardsService.createCards(createCardDto, userId, listId);
     }
