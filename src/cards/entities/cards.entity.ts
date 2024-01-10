@@ -1,9 +1,8 @@
 import { IsNumber, IsString } from 'class-validator';
-import { CommentsModel } from 'src/comments/entities/comments.entity';
 import { BaseModel } from 'src/common/entities/base.entity';
 import { ListsModel } from 'src/lists/entities/lists.entity';
 import { UsersModel } from 'src/users/entities/users.entity';
-import { Column, Entity, ManyToMany, ManyToOne, OneToMany } from 'typeorm';
+import { Column, Entity, ManyToMany, ManyToOne } from 'typeorm';
 
 @Entity()
 export class CardsModel extends BaseModel {
@@ -39,8 +38,4 @@ export class CardsModel extends BaseModel {
 
     @ManyToMany(() => UsersModel, (user) => user.works)
     workers: UsersModel[];
-
-    // 코드 확인하려고 추가한 부분. 상단에 import까지 확인하기.
-    @OneToMany(() => CommentsModel, (comment) => comment.card)
-    comments: CommentsModel;
 }
