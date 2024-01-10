@@ -8,8 +8,4 @@ export class CreateListDto {
     @IsInt()
     @IsNotEmpty({ message: 'order 번호를 입력해주세요.' })
     order: number;
-
-    // @IsInt()
-    // @IsNotEmpty({ message: 'workspace 번호를 입력해주세요.' })
-    // workspaceId: number;
 }

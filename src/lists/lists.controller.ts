@@ -5,12 +5,12 @@ import { OrderListDto } from './dto/order-list.dto';
 import { ListsService } from './lists.service';
 import { AccessTokenGuard } from 'src/auth/guard/bearer.guard';
 
+@UseGuards(AccessTokenGuard)
 @Controller('list')
 export class ListsController {
     constructor(private readonly listsService: ListsService) {}
 
     @Post(':workspaceId')
-    @UseGuards(AccessTokenGuard)
     async createList(
         @Param('workspaceId') workspaceId: number,
         @Body() createListDto: CreateListDto,
@@ -24,7 +24,6 @@ export class ListsController {
     }
 
     @Put(':workspaceId/:id')
-    @UseGuards(AccessTokenGuard)
     async updateList(
         @Param('workspaceId') workspaceId: number,
         @Param('id') id: number,
@@ -34,13 +33,11 @@ export class ListsController {
     }
 
     @Delete(':workspaceId/:id')
-    @UseGuards(AccessTokenGuard)
     deleteList(@Param('workspaceId') workspaceId: number, @Param('id') id: number) {
         return this.listsService.deleteList(workspaceId, id);
     }
 
     @Put(':workspaceId/:id/order')
-    @UseGuards(AccessTokenGuard)
     updateListOrder(
         @Param('workspaceId') workspaceId: number,
         @Param('id') id: number,

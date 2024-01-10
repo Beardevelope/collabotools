@@ -16,6 +16,7 @@ export class ListsService {
     ) {}
     async createList(workspaceId: number, createListDto: CreateListDto) {
         await this.verifyWorkSpaceId(workspaceId);
+        await this.verifyOrderId(createListDto.order);
 
         const list = this.listsRepository.create({
             workspaceId,
@@ -52,7 +53,8 @@ export class ListsService {
     async updateListOrder(workspaceId: number, id: number, orderListDto: OrderListDto) {
         await this.verifyWorkSpaceId(workspaceId);
         await this.verifylistIdAndWorkspaceId(id, workspaceId);
-        await this.listsRepository.update(id, orderListDto);
+        await this.verifyOrderIdAndWorkspaceId(orderListDto.order, workspaceId);
+        await this.listsRepository.update(id, { order: orderListDto.order });
         return await this.listsRepository.find({
             where: { workspaceId: workspaceId },
             order: {
@@ -79,5 +81,27 @@ export class ListsService {
             throw new BadRequestException('list를 찾을 수 없습니다.');
         }
         return existlistIdAndWorkspaceId;
+    }
+
+    async verifyOrderId(order: number) {
+        const existOrderId = await this.listsRepository.findOne({
+            where: { order },
+        });
+        if (existOrderId) {
+            throw new BadRequestException('중복된 order 번호 입니다.');
+        }
+        console.log(existOrderId);
+        return existOrderId;
+    }
+
+    async verifyOrderIdAndWorkspaceId(order: number, workspaceId: number) {
+        const existOrderIdAndWorkspaceId = await this.listsRepository.findOne({
+            where: { order, workspaceId },
+        });
+        if (existOrderIdAndWorkspaceId) {
+            throw new BadRequestException('중복된 order 번호 입니다.');
+        }
+        console.log(existOrderIdAndWorkspaceId);
+        return existOrderIdAndWorkspaceId;
     }
 }
