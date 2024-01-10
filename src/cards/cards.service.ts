@@ -4,12 +4,15 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateCardDto } from './dto/create-card.dto';
 import { UpdateCardDto } from './dto/update-card.dto';
+import { LexoRank } from 'lexorank';
+import { UsersService } from 'src/users/users.service';
 
 @Injectable()
 export class CardsService {
     constructor(
         @InjectRepository(CardsModel)
         private cardRepository: Repository<CardsModel>,
+        private readonly usersService: UsersService,
     ) {}
 
     async createCards(createCardDto: CreateCardDto, userId: number, listId: number) {
@@ -20,12 +23,26 @@ export class CardsService {
                 },
             },
         });
+
+        console.log(findCards.length);
+
+        let newLexoRank: LexoRank;
+        if (findCards.length > 0) {
+            newLexoRank = LexoRank.parse(findCards[findCards.length - 1].order).genNext();
+        } else {
+            newLexoRank = LexoRank.min();
+            /**
+             *  min말고 middle로 하는 경우가 좋다고함.
+             * update시에 0.10000e 식으로 나오는걸 lexoRankParse 를 검색해보기.
+             *  */
+        }
+
         // 생성 카드 정의.
         const card = this.cardRepository.create({
             title: createCardDto.title,
             description: createCardDto.description,
             color: createCardDto.color,
-            order: findCards.length + 1,
+            order: newLexoRank.toString(),
             user: {
                 id: userId,
             },
@@ -86,6 +103,8 @@ export class CardsService {
             where: {
                 id,
             },
+            //relations: { workers: true },
+            // 관계가 없으면 불러올수없음 135
         });
 
         if (!card) {
@@ -93,5 +112,70 @@ export class CardsService {
         }
 
         return card;
+    }
+
+    /**
+     * 존재하는 유저인지 아닌지 확인 할 수 있는 내부함수
+     */
+
+    private async availableUserById(userId: number) {
+        const user = await this.usersService.getUser(userId);
+
+        if (!user) {
+            throw new NotFoundException('해당 유저는 존재하지 않습니다.');
+        }
+
+        return user;
+    }
+
+    /**
+     * 작업자 user 추가 API
+     */
+
+    async addUserToCard(cardId: number, userId: number) {
+        const card = await this.availableCardById(cardId);
+        const user = await this.availableUserById(userId);
+
+        card.workers = [...card.workers, user];
+
+        // const newMember = this.cardRepository.create({
+        //     ...card,
+        //     workers: [card.workers, user],
+        // });
+        //        const newWorkers = [...card.workers, user];
+
+        await this.cardRepository.save(card);
+        //({ ...card, workers: [] })
+        return { newMember: user, message: '작업자 추가' };
+    }
+
+    async updateCardOrder(listId: number, cardId: number, rankId: string) {
+        const findTest = await this.cardRepository.find({
+            where: {
+                list: {
+                    id: listId,
+                },
+            },
+            order: {
+                order: 'ASC',
+            },
+        });
+
+        const findCard = await this.cardRepository.findOne({
+            where: {
+                id: cardId,
+                list: {
+                    id: listId,
+                },
+            },
+        });
+        const prevLexoRank: LexoRank = LexoRank.parse(rankId);
+        const nextLexoRank: LexoRank = LexoRank.parse(rankId).genNext();
+
+        const moveLexoRank: LexoRank = prevLexoRank.between(nextLexoRank);
+
+        findCard.order = moveLexoRank.toString();
+
+        await this.cardRepository.update({ id: findCard.id }, { ...findCard });
     }
 }
