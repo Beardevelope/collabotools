@@ -4,11 +4,11 @@ import { UpdateListDto } from './dto/update-list.dto';
 import { OrderListDto } from './dto/order-list.dto';
 import { ListsService } from './lists.service';
 
-@Controller('workspaces/:workspaceId/list')
+@Controller('list')
 export class ListsController {
     constructor(private readonly listsService: ListsService) {}
 
-    @Post()
+    @Post(':workspaceId')
     async createList(
         @Param('workspaceId') workspaceId: number,
         @Body() createListDto: CreateListDto,
@@ -16,31 +16,31 @@ export class ListsController {
         return await this.listsService.createList(workspaceId, createListDto);
     }
 
-    @Get()
+    @Get(':workspaceId')
     async findAllLists(@Param('workspaceId') workspaceId: number) {
         return await this.listsService.findAllLists(workspaceId);
     }
 
-    @Put('/:listId')
+    @Put(':workspaceId/:id')
     async updateList(
         @Param('workspaceId') workspaceId: number,
-        @Param('listId') listId: number,
+        @Param('id') id: number,
         @Body() updateListDto: UpdateListDto,
     ) {
-        return this.listsService.updateList(workspaceId, listId, updateListDto);
+        return this.listsService.updateList(workspaceId, id, updateListDto);
     }
 
-    @Delete('/:listId')
-    deleteList(@Param('workspaceId') workspaceId: number, @Param('listId') listId: number) {
-        return this.listsService.deleteList(workspaceId, listId);
+    @Delete(':workspaceId/:id')
+    deleteList(@Param('workspaceId') workspaceId: number, @Param('id') id: number) {
+        return this.listsService.deleteList(workspaceId, id);
     }
 
-    @Put('/:listId/order')
+    @Put(':workspaceId/:id/order')
     updateListOrder(
         @Param('workspaceId') workspaceId: number,
-        @Param('listId') listId: number,
+        @Param('id') id: number,
         @Body() orderListDto: OrderListDto,
     ) {
-        return this.listsService.updateListOrder(workspaceId, listId, orderListDto);
+        return this.listsService.updateListOrder(workspaceId, id, orderListDto);
     }
 }

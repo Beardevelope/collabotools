@@ -35,24 +35,24 @@ export class ListsService {
         });
     }
 
-    async updateList(workspaceId: number, listId: number, updateListDto: UpdateListDto) {
+    async updateList(workspaceId: number, id: number, updateListDto: UpdateListDto) {
         await this.verifyWorkSpaceId(workspaceId);
-        await this.verifylistIdAndWorkspaceId(listId, workspaceId);
-        await this.listsRepository.update({ id: listId }, updateListDto);
+        await this.verifylistIdAndWorkspaceId(id, workspaceId);
+        await this.listsRepository.update(id, updateListDto);
         return { message: 'lsit를 수정했습니다.' };
     }
 
-    async deleteList(workspaceId: number, listId: number) {
+    async deleteList(workspaceId: number, id: number) {
         await this.verifyWorkSpaceId(workspaceId);
-        await this.verifylistIdAndWorkspaceId(listId, workspaceId);
-        await this.listsRepository.delete({ id: listId });
+        await this.verifylistIdAndWorkspaceId(id, workspaceId);
+        await this.listsRepository.delete(id);
         return { message: 'lsit를 삭제했습니다.' };
     }
 
-    async updateListOrder(workspaceId: number, listId: number, orderListDto: OrderListDto) {
+    async updateListOrder(workspaceId: number, id: number, orderListDto: OrderListDto) {
         await this.verifyWorkSpaceId(workspaceId);
-        await this.verifylistIdAndWorkspaceId(listId, workspaceId);
-        await this.listsRepository.update({ id: listId }, orderListDto);
+        await this.verifylistIdAndWorkspaceId(id, workspaceId);
+        await this.listsRepository.update(id, orderListDto);
         return await this.listsRepository.find({
             where: { workspaceId: workspaceId },
             order: {
@@ -71,9 +71,9 @@ export class ListsService {
         return existWorkspaceId;
     }
 
-    async verifylistIdAndWorkspaceId(listId: number, workspaceId: number) {
+    async verifylistIdAndWorkspaceId(id: number, workspaceId: number) {
         const existlistIdAndWorkspaceId = await this.listsRepository.findOne({
-            where: { id: listId, workspaceId },
+            where: { id, workspaceId },
         });
         if (!existlistIdAndWorkspaceId) {
             throw new BadRequestException('list를 찾을 수 없습니다.');
