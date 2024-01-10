@@ -1,8 +1,9 @@
-import { IsNumber, IsString } from 'class-validator';
+import { IsString } from 'class-validator';
+import { CommentsModel } from 'src/comments/entities/comments.entity';
 import { BaseModel } from 'src/common/entities/base.entity';
 import { ListsModel } from 'src/lists/entities/lists.entity';
 import { UsersModel } from 'src/users/entities/users.entity';
-import { Column, Entity, ManyToMany, ManyToOne } from 'typeorm';
+import { Column, Entity, ManyToMany, ManyToOne, OneToMany } from 'typeorm';
 
 @Entity()
 export class CardsModel extends BaseModel {
@@ -14,11 +15,8 @@ export class CardsModel extends BaseModel {
     @IsString()
     description: string;
 
-    @Column({
-        default: 1,
-    })
-    @IsNumber()
-    order: number;
+    @Column()
+    order: string;
 
     @Column()
     @IsString()
@@ -27,7 +25,7 @@ export class CardsModel extends BaseModel {
     /**
      * 리스트
      */
-    @ManyToOne(() => ListsModel, (list) => list.cards)
+    @ManyToOne(() => ListsModel, (list) => list.cards, { onDelete: 'CASCADE' })
     list: ListsModel;
 
     /**
@@ -38,4 +36,7 @@ export class CardsModel extends BaseModel {
 
     @ManyToMany(() => UsersModel, (user) => user.works)
     workers: UsersModel[];
+
+    @OneToMany(() => CommentsModel, (comment) => comment.card)
+    comments: CommentsModel[];
 }

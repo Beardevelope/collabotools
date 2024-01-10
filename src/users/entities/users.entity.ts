@@ -41,7 +41,7 @@ export class UsersModel extends BaseModel {
      */
     @ManyToMany(() => WorkspacesModel, (workspace) => workspace.users)
     @JoinTable()
-    workspaces: WorkspacesModel;
+    workspaces: WorkspacesModel[];
 
     /**
      * 카드

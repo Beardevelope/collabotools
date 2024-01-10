@@ -3,18 +3,18 @@ import { CardsController } from './cards.controller';
 import { CardsService } from './cards.service';
 
 describe('CardsController', () => {
-  let controller: CardsController;
+    let controller: CardsController;
 
-  beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      controllers: [CardsController],
-      providers: [CardsService],
-    }).compile();
+    beforeEach(async () => {
+        const module: TestingModule = await Test.createTestingModule({
+            controllers: [CardsController],
+            providers: [CardsService],
+        }).compile();
 
-    controller = module.get<CardsController>(CardsController);
-  });
+        controller = module.get<CardsController>(CardsController);
+    });
 
-  it('should be defined', () => {
-    expect(controller).toBeDefined();
-  });
+    it('should be defined', () => {
+        expect(controller).toBeDefined();
+    });
 });
