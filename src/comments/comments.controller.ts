@@ -47,9 +47,11 @@ export class CommentsController {
     async updateComment(
         @Request() req,
         @Param('id') id: number,
-        @Body() updatedComment: CommentsModel,
+        @Param('cardId') cardId: number,
+        @Body()
+        updatedComment: CommentsModel,
     ) {
-        const comment = await this.commentsService.updateComment(id, updatedComment);
+        const comment = await this.commentsService.updateComment(id, cardId, updatedComment);
         if (comment.userId !== req.userId) {
             throw new ForbiddenException('권한이 없습니다.');
         }
@@ -63,13 +65,13 @@ export class CommentsController {
 
     @UseGuards(AccessTokenGuard)
     @Delete(':cardId/:id')
-    async deleteComment(@Request() req, @Param('id') id: number) {
+    async deleteComment(@Request() req, @Param('id') id: number, @Param('cardId') cardId: number) {
         const comment = await this.commentsService.getCommentById(id);
         if ((comment as CommentsModel)?.userId !== req.userId) {
             throw new ForbiddenException('권한이 없습니다.');
         }
 
-        await this.commentsService.deleteComment(id);
+        await this.commentsService.deleteComment(id, cardId);
         return {
             statusCode: HttpStatus.OK,
             message: '댓글이 삭제되었습니다.',

@@ -46,14 +46,28 @@ export class CommentsService {
         return foundComment;
     }
 
-    async updateComment(id: number, updatedComment: CommentsModel) {
+    async updateComment(id: number, cardId: number, updatedComment: CommentsModel) {
         await this.verifyCommentId(id);
+        await this.verifyCardId(cardId);
+
+        const comment = await this.commentRepository.findOne({ where: { id, cardId } });
+        if (!comment) {
+            throw new NotFoundException('댓글을 찾을 수 없습니다.');
+        }
+
         await this.commentRepository.update(id, updatedComment);
         return this.verifyCommentId(id);
     }
 
-    async deleteComment(id: number) {
+    async deleteComment(id: number, cardId: number) {
         await this.verifyCommentId(id);
+        await this.verifyCardId(cardId);
+
+        const comment = await this.commentRepository.findOne({ where: { id, cardId } });
+        if (!comment) {
+            throw new NotFoundException('댓글을 찾을 수 없습니다.');
+        }
+
         const result = await this.commentRepository.delete(id);
     }
 }
