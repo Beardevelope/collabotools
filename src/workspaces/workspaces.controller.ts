@@ -7,50 +7,62 @@ import { AccessTokenGuard } from 'src/auth/guard/bearer.guard';
 @Controller('workspaces')
 @UseGuards(AccessTokenGuard)
 export class WorkspacesController {
-  constructor(private readonly workspacesService: WorkspacesService) {}
+    constructor(private readonly workspacesService: WorkspacesService) {}
 
     /**
      * 워크스페이스 생성
      * (로그인 한 사용자 가능)
      */
-  @Post()
-  async createWorkspace(@Req() req: Request,@Body() createworkspaceDto: CreateWorkspaceDto) {
-    return await this.workspacesService.createWorkspace(req['userId'],createworkspaceDto);
-  }
+    @Post()
+    async createWorkspace(@Req() req: Request, @Body() createworkspaceDto: CreateWorkspaceDto) {
+        return await this.workspacesService.createWorkspace(req['userId'], createworkspaceDto);
+    }
 
     /**
      * 워크스페이스 조회
      * (멤버 추가된 워크스페이스만 조회)
      */
-  @Get()
-  async findAllWorkspace(@Req() req: Request) {
-    return await this.workspacesService.findAllWorkspace(req['userId']);
-  }
+    @Get()
+    async findAllWorkspace(@Req() req: Request) {
+        return await this.workspacesService.findAllWorkspace(req['userId']);
+    }
 
     /**
      * 워크스페이스 수정
      * (워크스페이스 운영자만 가능)
      */
-  @Put(':workspaceId')
-    async updateWorkspace(@Req() req: Request,@Param('workspaceId') workspaceId: number,@Body() createworkspaceDto: CreateWorkspaceDto) {
-      return await this.workspacesService.updateWorkspace(req['userId'],workspaceId,createworkspaceDto);
-  }
-  
+    @Put(':workspaceId')
+    async updateWorkspace(
+        @Req() req: Request,
+        @Param('workspaceId') workspaceId: number,
+        @Body() createworkspaceDto: CreateWorkspaceDto,
+    ) {
+        return await this.workspacesService.updateWorkspace(
+            req['userId'],
+            workspaceId,
+            createworkspaceDto,
+        );
+    }
+
     /**
      * 워크스페이스 삭제
      * (워크스페이스 운영자만 가능)
      */
-  @Delete(':workspaceId')
-  async deleteWorkspace(@Req() req: Request, @Param('workspaceId') workspaceId: number) {
-    return await this.workspacesService.deleteWorkspace(req['userId'],workspaceId);
-  }
+    @Delete(':workspaceId')
+    async deleteWorkspace(@Req() req: Request, @Param('workspaceId') workspaceId: number) {
+        return await this.workspacesService.deleteWorkspace(req['userId'], workspaceId);
+    }
 
     /**
      * 워크스페이스 멤버 추가
      * (워크스페이스 운영자만 가능)
      */
-  @Post(':workspaceId/invite')
-  async inviteMember(@Req() req: Request, @Body() membersDto: MembersDto, @Param('workspaceId') workspaceId: number) {
-    return await this.workspacesService.inviteMembers(req['userId'],workspaceId,membersDto);
-  }
+    @Post(':workspaceId/invite')
+    async inviteMember(
+        @Req() req: Request,
+        @Body() membersDto: MembersDto,
+        @Param('workspaceId') workspaceId: number,
+    ) {
+        return await this.workspacesService.inviteMembers(req['userId'], workspaceId, membersDto);
+    }
 }
