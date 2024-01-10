@@ -62,7 +62,6 @@ export class CardsController {
         @Param('cardId', ParseIntPipe) cardId: number,
         @Body('rankId') rankId: string,
     ) {
-        console.log(rankId);
         return await this.cardsService.updateCardOrder(listId, cardId, rankId);
     }
 }

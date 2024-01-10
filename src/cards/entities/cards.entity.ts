@@ -33,8 +33,6 @@ export class CardsModel extends BaseModel {
     @ManyToOne(() => UsersModel, (user) => user.cards)
     user: UsersModel;
 
-    @ManyToMany(() => UsersModel, (user) => user.works, {
-        eager: true,
-    })
+    @ManyToMany(() => UsersModel, (user) => user.works)
     workers: UsersModel[];
 }
