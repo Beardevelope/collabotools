@@ -23,6 +23,13 @@ export class CardsModel extends BaseModel {
     color: string;
 
     /**
+     * jihye
+     * 마감일 추가
+     */
+    @Column()
+    deadline: Date;
+
+    /**
      * 리스트
      */
     @ManyToOne(() => ListsModel, (list) => list.cards, { onDelete: 'CASCADE' })

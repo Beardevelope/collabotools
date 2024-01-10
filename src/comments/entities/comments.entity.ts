@@ -10,7 +10,7 @@ import {
     ManyToOne,
 } from 'typeorm';
 
-@Entity('comments')
+@Entity('comments_model')
 export class CommentsModel {
     @PrimaryGeneratedColumn()
     id: number;
