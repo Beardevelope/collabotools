@@ -37,6 +37,6 @@ export class CardsModel extends BaseModel {
     @ManyToMany(() => UsersModel, (user) => user.works)
     workers: UsersModel[];
 
-    @OneToMany(() => CommentsModel, (comment) => comment.card)
+    @OneToMany(() => CommentsModel, (comments) => comments.card)
     comments: CommentsModel[];
 }
