@@ -7,7 +7,7 @@ import { CommentsModel } from './entities/comments.entity';
 import { AuthModule } from 'src/auth/auth.module';
 
 @Module({
-    imports: [TypeOrmModule.forFeature([CardsModel, CommentsModel]), AuthModule, CardsModel],
+    imports: [TypeOrmModule.forFeature([CardsModel, CommentsModel]), AuthModule],
     controllers: [CommentsController],
     providers: [CommentsService],
 })

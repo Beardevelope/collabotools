@@ -65,7 +65,7 @@ export class CommentsController {
     @Delete(':cardId/:id')
     async deleteComment(@Request() req, @Param('id') id: number) {
         const comment = await this.commentsService.getCommentById(id);
-        if (comment.userId !== req.userId) {
+        if ((comment as CommentsModel)?.userId !== req.userId) {
             throw new ForbiddenException('권한이 없습니다.');
         }
 
